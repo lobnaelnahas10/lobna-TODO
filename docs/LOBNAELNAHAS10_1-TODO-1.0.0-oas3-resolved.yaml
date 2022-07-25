@@ -1,0 +1,102 @@
+---
+openapi: 3.0.0
+info:
+  title: TODO API
+  description: Used to get API info
+  contact:
+    email: lobnaelnahas10@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0-oas3
+servers:
+- url: https://virtserver.swaggerhub.com/LOBNAELNAHAS10_1/TODO/1.0.0
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+paths:
+  /todo:
+    get:
+      tags:
+      - todo
+      summary: get todos
+      operationId: Gettodo
+      responses:
+        "405":
+          description: Invalid input
+    post:
+      tags:
+      - todo
+      summary: add a new item
+      operationId: CreateTodo
+      responses:
+        "201":
+          description: Created Successfully
+        "405":
+          description: Not Created Successfully
+  /todo/{id}:
+    get:
+      tags:
+      - todo
+      summary: get todos by id
+      operationId: Gettodobyid
+      parameters:
+      - name: id
+        in: path
+        description: ID of todo
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: get the right item
+        "401":
+          description: Invalid id
+    put:
+      tags:
+      - todo
+      summary: Update an existing todo
+      operationId: UpadateTodo
+      parameters:
+      - name: id
+        in: path
+        description: ID of todo
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "201":
+          description: Upadate successfuly
+        "405":
+          description: Invalid id
+    delete:
+      tags:
+      - todo
+      summary: Delete an existing todo
+      operationId: DeleteTodo
+      parameters:
+      - name: id
+        in: path
+        description: ID of todo
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Deleted successfuly
+        "404":
+          description: Invalid id
+components:
+  schemas: {}
