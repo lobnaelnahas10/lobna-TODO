@@ -20,7 +20,7 @@ var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 type todos struct {
 	ID   int    `json:"id"`
 	Task string `json:"task"`
-	Done bool `json:"done"`
+	//Done bool `json:"done"`
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {  //POST
@@ -101,11 +101,11 @@ func handleRequests() {
 	}
 	router := mux.NewRouter()
     
-	router.HandleFunc("/api/v1/todo", GetTodos).Methods("GET")
-	router.HandleFunc("/api/v1/todo/{id}", GetTodoByID).Methods("GET")
-	router.HandleFunc("/api/v1/todo", CreateTodo).Methods("POST")
-	router.HandleFunc("/api/v1/todo/{id}", UpdateTodo).Methods("PUT")
-	router.HandleFunc("/api/v1/todo/{taskId}", DeleteTodo).Methods("DELETE")
+	router.HandleFunc("/todo", GetTodos).Methods("GET")
+	router.HandleFunc("/todo/{id}", GetTodoByID).Methods("GET")
+	router.HandleFunc("/todo", CreateTodo).Methods("POST")
+	router.HandleFunc("/todo/{id}", UpdateTodo).Methods("PUT")
+	router.HandleFunc("/todo/{taskId}", DeleteTodo).Methods("DELETE")
     
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
     log.Fatal(http.ListenAndServe(":10000", router))

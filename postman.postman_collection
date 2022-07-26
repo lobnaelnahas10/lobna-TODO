@@ -11,7 +11,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:4000/api/v1/todo",
+					"raw": "localhost:10000/api/v1/todo",
 					"host": [
 						"localhost"
 					],
