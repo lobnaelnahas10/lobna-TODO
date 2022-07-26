@@ -40,6 +40,7 @@ func GetTodos(w http.ResponseWriter, r *http.Request) { //GET all
 		panic("error parsing data")
 	}
 	w.Header().Set("Content-Type", "application/json")
+	
 	var new []todos
 	DB.Find(&new)
 	json.NewEncoder(w).Encode(new)
@@ -51,10 +52,19 @@ func GetTodoByID(w http.ResponseWriter, r *http.Request) {  //GET by ID
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var res todos
-	DB.First(&res, id)
+	out := DB.First(&res, id)
+	if out.Error != nil {
+	  http.Error(w, out.Error.Error(), http.StatusInternalServerError)
+	  w.WriteHeader(http.StatusNotFound)
+	  w.Write([]byte("404 - can't find this task"))
+	  return
+	}
 	data, err := json.Marshal(res)
 	if err != nil {
-		panic("error parsing data")
+	  http.Error(w, out.Error.Error(), http.StatusInternalServerError)
+	  w.WriteHeader(http.StatusNotFound)
+	  w.Write([]byte("404 - Error can't find this task"))
+	  return
 	}
 	w.Write(data)
 	w.Write([]byte("\n"))
@@ -78,10 +88,17 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {  //DELETE
 	id, _ := strconv.Atoi(param["taskId"])
 
 	var new = todos{ID: id}
+	DB.Find(&new)
 	DB.Delete(&new)
-	w.WriteHeader(http.StatusOK)
-
-	w.Write([]byte("200 - Task deleted successfuly"))
+	var id_deleted = 0
+	if(DB.RowsAffected>0){
+          DB.Delete(DB.Find(&id_deleted))
+		  w.WriteHeader(http.StatusOK)
+		  w.Write([]byte("200 - Task deleted successfuly"))
+	}else {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("204 - Task already deleted"))
+	}
 }
 
 func homePage(w http.ResponseWriter, r *http.Request){
