@@ -15,7 +15,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 const DBName = "todos.db"
-var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
+//var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 
 type todos struct {
 	ID   int    `json:"id"`
@@ -23,18 +23,21 @@ type todos struct {
 	//Done bool `json:"done"`
 }
 
-func CreateTodo(w http.ResponseWriter, r *http.Request) {  //POST
+type Server struct {
+	DB *gorm.DB
+}
+func (s *Server)CreateTodo(w http.ResponseWriter, r *http.Request) {  //POST
 	w.Header().Set("Content-Type", "application/json")
 	var new todos
 	json.NewDecoder(r.Body).Decode(&new)
-	DB.Create(&new)
+	s.DB.Create(&new)
 	json.NewEncoder(w).Encode(new)
 	w.WriteHeader(http.StatusOK)
 
 }
 
-func GetTodos(w http.ResponseWriter, r *http.Request) { //GET all
-	_, err := DB.Model(&todos{}).Where("ID > ?", "0").Rows()
+func (s *Server) GetTodos(w http.ResponseWriter, r *http.Request) { //GET all
+	_, err := s.DB.Model(&todos{}).Where("ID > ?", "0").Rows()
 
 	if err != nil {
 		panic("error parsing data")
@@ -42,17 +45,16 @@ func GetTodos(w http.ResponseWriter, r *http.Request) { //GET all
 	w.Header().Set("Content-Type", "application/json")
 	
 	var new []todos
-	DB.Find(&new)
+	s.DB.Find(&new)
 	json.NewEncoder(w).Encode(new)
 	w.WriteHeader(http.StatusOK)
-
 }
 
-func GetTodoByID(w http.ResponseWriter, r *http.Request) {  //GET by ID
+func (s *Server) GetTodoByID(w http.ResponseWriter, r *http.Request) {  //GET by ID
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var res todos
-	out := DB.First(&res, id)
+	out := s.DB.First(&res, id)
 	if out.Error != nil {
 	  http.Error(w, out.Error.Error(), http.StatusInternalServerError)
 	  w.WriteHeader(http.StatusNotFound)
@@ -71,33 +73,43 @@ func GetTodoByID(w http.ResponseWriter, r *http.Request) {  //GET by ID
 
 }
 
-func UpdateTodo(w http.ResponseWriter, r *http.Request) { //PUT
+func (s *Server) UpdateTodo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
 	var new todos
-	DB.First(&new, param["ID"])
+	res := s.DB.First(&new, param["ID"])
 	json.NewDecoder(r.Body).Decode(&new)
-	DB.Save(&new)
+  
+	if res.Error != nil {
+	  http.Error(w, res.Error.Error(), http.StatusInternalServerError)
+	  w.WriteHeader(http.StatusNotFound)
+	  w.Write([]byte("404 - can't find this task"))
+	  return
+	}
+  
+	s.DB.Save(&new)
 	json.NewEncoder(w).Encode(&new)
 	w.WriteHeader(http.StatusOK)
-}
+  
+  }
 
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {  //DELETE
+func (s *Server) DeleteTodo(w http.ResponseWriter, r *http.Request) {  //DELETE
 	w.Header().Set("Content-Type", "application/json")
 	param := mux.Vars(r)
 	id, _ := strconv.Atoi(param["taskId"])
 
 	var new = todos{ID: id}
-	DB.Find(&new)
-	DB.Delete(&new)
-	var id_deleted = 0
-	if(DB.RowsAffected>0){
-          DB.Delete(DB.Find(&id_deleted))
-		  w.WriteHeader(http.StatusOK)
-		  w.Write([]byte("200 - Task deleted successfuly"))
+	s.DB.Find(&new)
+	res := s.DB.First(&new, "ID")
+	s.DB.Delete(&new)
+	if res.Error != nil {
+		http.Error(w, res.Error.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 - can't find this task"))
+		return
 	}else {
-		w.WriteHeader(http.StatusNoContent)
-		w.Write([]byte("204 - Task already deleted"))
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("200 - Task deleted successfully"))
 	}
 }
 
@@ -108,7 +120,8 @@ func homePage(w http.ResponseWriter, r *http.Request){
 
 func handleRequests() {
     http.HandleFunc("/", homePage)
-
+	var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
+    server := Server{DB}
 	if !(DB.Migrator().HasTable(&todos{})) {
 		log.Println("table { todos } created")
 		DB.Migrator().CreateTable(&todos{})
@@ -118,16 +131,16 @@ func handleRequests() {
 	}
 	router := mux.NewRouter()
     
-	router.HandleFunc("/todo", GetTodos).Methods("GET")
-	router.HandleFunc("/todo/{id}", GetTodoByID).Methods("GET")
-	router.HandleFunc("/todo", CreateTodo).Methods("POST")
-	router.HandleFunc("/todo/{id}", UpdateTodo).Methods("PUT")
-	router.HandleFunc("/todo/{taskId}", DeleteTodo).Methods("DELETE")
+	router.HandleFunc("/todo", server.GetTodos).Methods("GET")
+	router.HandleFunc("/todo/{id}", server.GetTodoByID).Methods("GET")
+	router.HandleFunc("/todo", server.CreateTodo).Methods("POST")
+	router.HandleFunc("/todo/{id}", server.UpdateTodo).Methods("PUT")
+	router.HandleFunc("/todo/{taskId}", server.DeleteTodo).Methods("DELETE")
     
 	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
     log.Fatal(http.ListenAndServe(":10000", router))
 }
 
 func main() {
-    handleRequests()
+ //  handleRequests()
 }
