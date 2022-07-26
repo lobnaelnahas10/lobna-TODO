@@ -20,6 +20,7 @@ var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 type todos struct {
 	ID   int    `json:"id"`
 	Task string `json:"task"`
+	Done bool `json:"done"`
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {  //POST
