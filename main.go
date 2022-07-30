@@ -139,7 +139,7 @@ func initialize() (s Server){
 }
 
 func handleRequests() {
-	http.HandleFunc("/", homePage)
+	//http.HandleFunc("/", homePage)
 	var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 	server := Server{DB}
 	if !(DB.Migrator().HasTable(&todos{})) {
@@ -150,7 +150,7 @@ func handleRequests() {
 		panic("can't connect to DB")
 	}
 	router := mux.NewRouter()
-
+    http.HandleFunc("/", homeHandler)
 	router.HandleFunc("/todo", server.GetTodos).Methods("GET")
 	router.HandleFunc("/todo/{id}", server.GetTodoByID).Methods("GET")
 	router.HandleFunc("/todo", server.CreateTodo).Methods("POST")
