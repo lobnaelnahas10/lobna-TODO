@@ -14,10 +14,11 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"github.com/thedevsaddam/renderer"
 )
 
 const DBName = "todos.db"
-
+var rnd *renderer.Render
 //var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 
 type todos struct {
@@ -122,7 +123,13 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: homePage")
 }
 
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	err := rnd.Template(w, http.StatusOK, []string{"client/app.tpl"}, nil)
+	fmt.Errorf(err.Error())
+}
+
 func initialize() (s Server){
+	rnd = renderer.New()
 	var DB, err = gorm.Open(sqlite.Open(DBName), &gorm.Config{})
 	if err != nil {
 		fmt.Errorf("can not connect to db")
@@ -155,5 +162,5 @@ func handleRequests() {
 }
 
 func main() {
-	//  handleRequests()
+	  handleRequests()
 }

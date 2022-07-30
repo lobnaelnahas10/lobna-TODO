@@ -53,6 +53,8 @@ github.com/swaggo/http-swagger v1.3.0 h1:1+6M4qRorIbdyTWTsGrwnb0r9jGK5dcWN82O6oY
 github.com/swaggo/http-swagger v1.3.0/go.mod h1:9glekdg40lwclrrKNRGgj/IMDxpNPZ3kzab4oPcF8EM=
 github.com/swaggo/swag v1.8.1 h1:JuARzFX1Z1njbCGz+ZytBR15TFJwF2Q7fu8puJHhQYI=
 github.com/swaggo/swag v1.8.1/go.mod h1:ugemnJsPZm/kRwFUnzBlbHRd0JY9zE1M4F+uy2pAaPQ=
+github.com/thedevsaddam/renderer v1.2.0 h1:+N0J8t/s2uU2RxX2sZqq5NbaQhjwBjfovMU28ifX2F4=
+github.com/thedevsaddam/renderer v1.2.0/go.mod h1:k/TdZXGcpCpHE/KNj//P2COcmYEfL8OV+IXDX0dvG+U=
 golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 h1:kQgndtyPBW/JIYERgdxfwMYh3AVStj88WQTlNDi2a+o=
 golang.org/x/net v0.0.0-20210421230115-4e50805a0758/go.mod h1:72T/g9IO56b78aLF+1Kcs5dz7/ng1VjMUvfKvpfy+jM=
 golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
