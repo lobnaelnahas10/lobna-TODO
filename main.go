@@ -8,9 +8,7 @@ import (
 	"os/signal"
      model "swag-gin-demo/models"
 	"time"
-
-	middleware "swag-gin-demo/middleware"
-
+	 middleware "swag-gin-demo/middleware"
 	"github.com/gin-gonic/gin"
 
 	"github.com/gin-contrib/cors"
