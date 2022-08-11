@@ -2,7 +2,7 @@
     import { onMount } from "svelte/internal";
     
     let todos = []
-    const baseURL = "http://localhost:10000/todo"
+    const baseURL = "http://localhost:8080/todo"
     
     const getTodos = async () => {
       const response = await fetch(baseURL)

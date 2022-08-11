@@ -3,98 +3,82 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"net/http"
 	"net/http/httptest"
+	model "swag-gin-demo/models"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestCreateTodo(t *testing.T) {  //POST
-	var server Server
-	newTodo := todos{
-		ID:   12,
-		Task: "task",
+func SetUpRouter() *gin.Engine {
+	router := gin.Default()
+	return router
+}
+
+func TestGetAllTodos(t *testing.T) {
+
+	r := SetUpRouter()
+	app := App{}
+	r.GET("/todo", app.GetAllTodos)
+	request, _ := http.NewRequest("Get", "/todo", nil)
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, request)
+	status := response.Code
+
+	if status != http.StatusOK {
+		t.Errorf("Returned Wrong status code: got %v want %v", status, http.StatusOK)
 	}
-	server = initialize()
-	jsonValue, _ := json.Marshal(newTodo)
 
-	t.Run("create new todo", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/todo", bytes.NewBuffer(jsonValue))
-		response := httptest.NewRecorder()
-	
-		server.CreateTodo(response, request)
-
-		assertStatus(t, response.Code, http.StatusOK)
-
-	})
 }
 
-func TestGETtodo(t *testing.T) {
-	server := initialize()
-	t.Run("returns all todo items", func(t *testing.T) { //GET ALL
-		request := httptest.NewRequest(http.MethodGet, "/todo", nil)
-		response := httptest.NewRecorder()
-        
-		server.GetTodos(response, request)
-		assertStatus(t, response.Code, http.StatusOK)
-	})
-
-	t.Run("return todo items by id", func(t *testing.T) { //GET BY ID
-		request := httptest.NewRequest(http.MethodGet, "/todo/12", nil)
-		response := httptest.NewRecorder()
-        
-		server.GetTodoByID(response, request)
-		assertStatus(t, response.Code, http.StatusOK)
-	})
-}
-
-func TestDeleteTodo(t *testing.T) {  //DELETE
-	var server Server
-	server = initialize()
-
-	t.Run("delete existing/non-existing todo by id", func(t *testing.T) { 
-		request, _ := http.NewRequest(http.MethodPost, "/todo/12", nil)
-		response := httptest.NewRecorder()
-	
-		server.DeleteTodo(response, request)
-        if(response.Code == 200){assertStatus(t, response.Code, http.StatusOK) //id exits
-		}else { //id does not exist
-			assertStatus(t, response.Code, http.StatusNotFound)
-		}
-
-	})
-}
-
-func TestUpdateTodo(t *testing.T) {  //PUT
-	var server Server
-	newTodo := todos{
-		ID:   12,
-		Task: "task",
+func TestCreateTodo(t *testing.T) {
+	r := SetUpRouter()
+	handler := App{}
+	r.POST("/todo", handler.CreateTodo)
+	new := model.TodoList{
+		ID:   "3",
+		Task: "Github Actions",
 	}
-	server = initialize()
-	jsonValue, _ := json.Marshal(newTodo)
+	jsonList, _ := json.Marshal(new)
+	req, _ := http.NewRequest(http.MethodPost, "/todo", bytes.NewBuffer(jsonList))
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, req)
+	status := response.Body.String()
+	want := "{\"id\":3,\"task\":\"Github Actions\"}\n"
 
-	t.Run("create new todo", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/todo/12", bytes.NewBuffer(jsonValue))
-		response := httptest.NewRecorder()
-	
-		server.CreateTodo(response, request)
+	if status != want {
+		t.Errorf("Error!!. Expected %q, want %q", want, status)
+	}
 
-		assertStatus(t, response.Code, http.StatusOK)
-
-	})
 }
 
-func assertResponseBody(t testing.TB, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("response body is wrong, got %q want %q", got, want)
+func TestGetTodoByID(t *testing.T) {
+	r := SetUpRouter()
+	handler := App{}
+	r.GET("/todo/1", handler.GetTodoByID)
+	request, _ := http.NewRequest(http.MethodPost, "/todo/1", nil)
+	response := httptest.NewRecorder()
+
+	r.ServeHTTP(response, request)
+	status := response.Code
+	if status != http.StatusOK {
+		t.Errorf("Returned Wrong status code: got %v want %v", status, http.StatusOK)
+
 	}
 }
 
-func assertStatus(t testing.TB, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got %d, want %d", got, want)
+func TestDeleteTodo(t *testing.T) {
+	r := SetUpRouter()
+	handler := App{}
+	r.GET("/todo/1", handler.DeleteTodo)
+	request := httptest.NewRequest(http.MethodPost, "/todo/1", nil)
+	response := httptest.NewRecorder()
+	r.ServeHTTP(response, request)
+	status := response.Code
+	if status != http.StatusOK {
+		t.Errorf("Returned Wrong status code: got %v want %v", status, http.StatusOK)
 	}
+
 }
