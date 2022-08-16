@@ -14,7 +14,7 @@ type TodoList struct {
 }
 
 func ConnectDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("./database.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("./todos.db"), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect to database !!")
 	}
